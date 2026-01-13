@@ -12,11 +12,11 @@ PanaVista is a beautiful, easy-to-configure Home Assistant integration that brin
 > **Legend:** ✅ Implemented | ⬜ Planned
 
 ### Core Functionality
-- [ ] 🎨 **Beautiful Default Theme** - Stunning out of box, rivals commercial products
+- [x] 🎨 **Beautiful Default Theme** - Stunning out of box, rivals commercial products
 - [x] ⚙️ **Zero-Configuration Setup** - Auto-discovers calendars, smart defaults
-- [ ] 📱 **Fully Responsive** - Perfect on tablets, wall displays, or phones
-- [ ] 🌈 **Multiple Themes** - PanaVista, Minimal, Modern, Dark
-- [ ] 📅 **Multiple Views** - Day, Week, Month, Agenda
+- [x] 📱 **Fully Responsive** - Perfect on tablets, wall displays, or phones
+- [x] 🌈 **Multiple Themes** - PanaVista, Minimal, Modern, Dark
+- [x] 📅 **Multiple Views** - Day, Week, Month, Agenda
 - [ ] 🎯 **Simple Event Creation** - Quick add or advanced mode
 - [x] ☀️ **Integrated Weather** - Shows current and forecast weather
 - [x] 🕐 **Flexible Time Display** - 12-hour or 24-hour format
@@ -24,8 +24,8 @@ PanaVista is a beautiful, easy-to-configure Home Assistant integration that brin
 ### Technical Excellence
 - [x] 🔄 **HACS Integration** - Install and update with one click
 - [x] 🎛️ **UI Configuration** - No YAML editing required
-- [ ] 🔌 **Extensible Architecture** - Ready for future modules (chores, photos, tasks)
-- [ ] 🚀 **Performance Optimized** - Smooth on any hardware
+- [x] 🔌 **Extensible Architecture** - Modular component cards, ready for future modules
+- [x] 🚀 **Performance Optimized** - Smooth on any hardware
 - [x] 🔐 **Privacy First** - Your data stays local
 
 ---
@@ -90,13 +90,30 @@ For each selected calendar:
 - **Icon**: Choose an icon (optional)
 - **Link to Person**: Connect to a person entity to show avatar (optional)
 
-### 4. Add the Card to Your Dashboard
+### 4. Add Cards to Your Dashboard
 
-1. Go to your desired dashboard
-2. Click **"Edit Dashboard"**
-3. Click **"+ Add Card"**
-4. Search for **"PanaVista Calendar Card"**
-5. The card auto-configures itself!
+PanaVista provides **modular component cards** that you can arrange however you like:
+
+| Card | Purpose |
+|------|---------|
+| `panavista-clock-card` | Large time and date display |
+| `panavista-weather-card` | Weather conditions and forecast |
+| `panavista-toggles-card` | Calendar visibility toggles |
+| `panavista-grid-card` | Calendar grid (week/month/day views) |
+| `panavista-agenda-card` | Upcoming events list |
+| `panavista-calendar-card` | All-in-one card (legacy) |
+
+#### Quick Setup (All-in-One)
+1. Go to your dashboard → **Edit** → **Add Card**
+2. Search for **"PanaVista Calendar"**
+3. Done! The all-in-one card auto-configures.
+
+#### Custom Layout (Recommended for Wall Displays)
+1. Go to your dashboard → **Edit** → **Add Card**
+2. Add each component card individually
+3. Arrange them in the layout that works best for your display
+
+See [examples/dashboards/](examples/dashboards/) for ready-to-use layouts.
 
 **That's it!** Your beautiful calendar is ready.
 
@@ -242,23 +259,30 @@ service: panavista.refresh_calendars
 - [x] Basic frontend card
 - [x] Documentation
 
-### v0.2.0 - Enhanced Calendar
-- [ ] Full event rendering in card
+### v0.2.0 - Component Cards ✅
+- [x] Modular card architecture (clock, weather, toggles, grid, agenda)
+- [x] Shared state management for cross-card communication
+- [x] Theme system with 4 built-in themes
+- [x] Example dashboard layouts (portrait, landscape, compact)
+- [x] Full event rendering with calendar colors
+
+### v0.3.0 - Enhanced Calendar
 - [ ] Drag-to-create events
 - [ ] Multi-day event support
 - [ ] Event editing/deletion
+- [ ] Recurrence support
 
-### v0.3.0 - Photo Frame Module
+### v0.4.0 - Photo Frame Module
 - [ ] Slideshow during idle time
 - [ ] Google Photos integration
 - [ ] Custom photo folders
 
-### v0.4.0 - Chores & Tasks
+### v0.5.0 - Chores & Tasks
 - [ ] Household task tracking
 - [ ] Grocy integration
 - [ ] Completion tracking
 
-### v0.5.0 - Meal Planning
+### v0.6.0 - Meal Planning
 - [ ] Weekly meal calendar
 - [ ] Recipe integration
 - [ ] Shopping list generation

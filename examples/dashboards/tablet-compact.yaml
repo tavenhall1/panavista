@@ -1,0 +1,94 @@
+# PanaVista Calendar - Compact Tablet Layout
+#
+# This dashboard is optimized for smaller tablets (7-10")
+# or as a sidebar panel in your main dashboard.
+#
+# Great for:
+# - Kitchen tablets
+# - Bedside displays
+# - Dashboard sidebar widgets
+
+title: PanaVista Compact
+views:
+  - title: Calendar
+    path: calendar
+    cards:
+      # Compact header with time only
+      - type: custom:panavista-clock-card
+        entity: sensor.panavista_config
+        size: small
+        show_date: true
+        align: center
+
+      # Minimal toggles (icons only)
+      - type: custom:panavista-toggles-card
+        entity: sensor.panavista_config
+        show_names: false
+        show_add_button: false
+        layout: horizontal
+
+      # Agenda only (no grid for small screens)
+      - type: custom:panavista-agenda-card
+        entity: sensor.panavista_config
+        max_events: 8
+        days_ahead: 3
+        show_end_time: false
+
+---
+# Alternative: Day view for very small displays
+
+title: PanaVista Daily
+views:
+  - title: Today
+    path: today
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: horizontal-stack
+            cards:
+              - type: custom:panavista-clock-card
+                entity: sensor.panavista_config
+                size: small
+                show_date: false
+
+              - type: custom:panavista-weather-card
+                entity: sensor.panavista_config
+                show_details: false
+                layout: vertical
+
+          - type: custom:panavista-grid-card
+            entity: sensor.panavista_config
+            view: day
+
+---
+# Kiosk Mode compatible (for Fully Kiosk Browser)
+# Add these URL parameters: ?kiosk&hide_sidebar
+
+title: PanaVista Kiosk
+views:
+  - title: Display
+    path: display
+    type: panel
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: horizontal-stack
+            cards:
+              - type: custom:panavista-clock-card
+                entity: sensor.panavista_config
+                size: large
+                theme: dark
+
+              - type: custom:panavista-weather-card
+                entity: sensor.panavista_config
+                theme: dark
+                show_forecast: true
+
+          - type: custom:panavista-toggles-card
+            entity: sensor.panavista_config
+            theme: dark
+
+          - type: custom:panavista-grid-card
+            entity: sensor.panavista_config
+            view: week
+            theme: dark
