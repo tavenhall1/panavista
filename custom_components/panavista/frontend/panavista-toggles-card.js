@@ -253,16 +253,19 @@ class PanaVistaTogglesCard extends HTMLElement {
   }
 
   openAddEventDialog() {
-    const calendars = this.calendars;
-    if (calendars.length > 0) {
-      const firstCalendar = calendars[0];
-      const event = new CustomEvent('hass-more-info', {
-        bubbles: true,
-        composed: true,
-        detail: { entityId: firstCalendar.entity_id }
-      });
-      this.dispatchEvent(event);
+    const { PanaVistaBase } = window;
+    if (!PanaVistaBase || !PanaVistaBase.AddEventDialog) {
+      console.error('PanaVista AddEventDialog not available');
+      return;
     }
+
+    const calendars = this.calendars;
+    if (calendars.length === 0) {
+      return;
+    }
+
+    const dialog = new PanaVistaBase.AddEventDialog(this._hass, calendars);
+    dialog.show();
   }
 
   static getConfigElement() {
