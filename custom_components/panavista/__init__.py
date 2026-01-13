@@ -24,8 +24,16 @@ _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[Platform] = [Platform.SENSOR]
 
-# Frontend resource URL
-FRONTEND_SCRIPT_URL = f"/panavista_panel/panavista-calendar-card.js"
+# Frontend resource URLs - modular component cards
+FRONTEND_SCRIPTS = [
+    "/panavista_panel/panavista-base.js",        # Shared utilities (must load first)
+    "/panavista_panel/panavista-clock-card.js",  # Clock/date display
+    "/panavista_panel/panavista-weather-card.js", # Weather display
+    "/panavista_panel/panavista-toggles-card.js", # Calendar toggles
+    "/panavista_panel/panavista-grid-card.js",   # Calendar grid
+    "/panavista_panel/panavista-agenda-card.js", # Agenda list
+    "/panavista_panel/panavista-calendar-card.js", # Legacy all-in-one card
+]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -58,7 +66,7 @@ async def async_register_frontend(hass: HomeAssistant) -> None:
     # Get the path to the frontend directory
     frontend_path = Path(__file__).parent / "frontend"
 
-    # Register static path to serve the JS file using the new async API
+    # Register static path to serve the JS files using the new async API
     await hass.http.async_register_static_paths([
         StaticPathConfig(
             url_path="/panavista_panel",
@@ -67,14 +75,18 @@ async def async_register_frontend(hass: HomeAssistant) -> None:
         )
     ])
 
-    # Add the JS file to the frontend
-    add_extra_js_url(hass, FRONTEND_SCRIPT_URL)
+    # Add all JS files to the frontend (order matters - base must load first)
+    for script_url in FRONTEND_SCRIPTS:
+        add_extra_js_url(hass, script_url)
 
     # Mark as registered
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN]["frontend_registered"] = True
 
-    _LOGGER.info("PanaVista Calendar frontend registered at %s", FRONTEND_SCRIPT_URL)
+    _LOGGER.info(
+        "PanaVista Calendar frontend registered: %d component cards loaded",
+        len(FRONTEND_SCRIPTS)
+    )
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
