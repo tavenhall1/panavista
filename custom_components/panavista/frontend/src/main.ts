@@ -1,6 +1,9 @@
 // PanaVista Calendar v1.0
 // Single entry point — imports all cards and registers them with HA
 
+// Reusable sub-components
+import './components/color-swatch-picker';
+
 import './cards/panavista-calendar-card';
 import './cards/panavista-grid-card';
 import './cards/panavista-agenda-card';
