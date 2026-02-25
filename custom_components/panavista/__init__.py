@@ -18,21 +18,17 @@ from .const import (
     DOMAIN,
     UPDATE_INTERVAL_SECONDS,
     CONF_CALENDARS,
+    EVENT_RANGE_PAST_DAYS,
+    EVENT_RANGE_FUTURE_DAYS,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[Platform] = [Platform.SENSOR]
 
-# Frontend resource URLs - modular component cards
+# Frontend resource URL - single bundled output from LitElement/TypeScript build
 FRONTEND_SCRIPTS = [
-    "/panavista_panel/panavista-base.js",        # Shared utilities (must load first)
-    "/panavista_panel/panavista-clock-card.js",  # Clock/date display
-    "/panavista_panel/panavista-weather-card.js", # Weather display
-    "/panavista_panel/panavista-toggles-card.js", # Calendar toggles
-    "/panavista_panel/panavista-grid-card.js",   # Calendar grid
-    "/panavista_panel/panavista-agenda-card.js", # Agenda list
-    "/panavista_panel/panavista-calendar-card.js", # Legacy all-in-one card
+    "/panavista_panel/dist/panavista-cards.js",
 ]
 
 
@@ -83,10 +79,7 @@ async def async_register_frontend(hass: HomeAssistant) -> None:
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN]["frontend_registered"] = True
 
-    _LOGGER.info(
-        "PanaVista Calendar frontend registered: %d component cards loaded",
-        len(FRONTEND_SCRIPTS)
-    )
+    _LOGGER.info("PanaVista Calendar v1.0 frontend registered (single bundle)")
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -142,10 +135,10 @@ class PanaVistaCoordinator(DataUpdateCoordinator):
                 "conflicts": [],
             }
 
-            # Calculate time range for event fetching (2 weeks before and after)
+            # Calculate time range for event fetching
             now = dt_util.now()
-            start_time = now - timedelta(days=14)
-            end_time = now + timedelta(days=14)
+            start_time = now - timedelta(days=EVENT_RANGE_PAST_DAYS)
+            end_time = now + timedelta(days=EVENT_RANGE_FUTURE_DAYS)
 
             # Fetch events from each configured calendar
             for calendar_config in self.calendars:
@@ -223,12 +216,17 @@ class PanaVistaCoordinator(DataUpdateCoordinator):
 
             if response and entity_id in response:
                 events = response[entity_id].get("events", [])
-                # Convert datetime objects to ISO strings for JSON serialization
+                # Convert datetime objects to ISO strings and ensure all metadata passes through
                 for event in events:
                     if "start" in event and hasattr(event["start"], "isoformat"):
                         event["start"] = event["start"].isoformat()
                     if "end" in event and hasattr(event["end"], "isoformat"):
                         event["end"] = event["end"].isoformat()
+                    # Ensure UID and metadata are available for edit/delete operations
+                    event.setdefault("uid", "")
+                    event.setdefault("description", "")
+                    event.setdefault("location", "")
+                    event.setdefault("recurrence_id", "")
                 return events
             return []
         except Exception as err:
