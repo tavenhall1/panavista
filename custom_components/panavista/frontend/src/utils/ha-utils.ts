@@ -56,6 +56,7 @@ export function getPanaVistaData(hass: HomeAssistant, entityId = 'sensor.panavis
       default_view: 'day',
       theme: 'light',
     },
+    onboarding_complete: attrs.onboarding_complete,
     version: attrs.version,
   };
 }
