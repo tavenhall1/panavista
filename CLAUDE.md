@@ -5,30 +5,61 @@
 **PanaVista Calendar** is a professional Home Assistant custom integration that provides beautiful, easy-to-configure wall calendar functionality rivaling commercial products like Skylight and Hearth.
 
 **Project Type**: Home Assistant Custom Integration
-**Language**: Python 3.11+, JavaScript (frontend)
-**Key Technologies**: Home Assistant, DataUpdateCoordinator, ConfigFlow, Custom Lovelace Cards
+**Language**: Python 3.11+ (backend), TypeScript + LitElement (frontend)
+**Key Technologies**: Home Assistant, DataUpdateCoordinator, ConfigFlow, Lit 3.x, Rollup, Custom Lovelace Cards
 
 ## Repository Structure
 
 ```
-panavista-calendar/
-├── custom_components/panavista/    # The integration
-│   ├── __init__.py                 # Integration setup, coordinator
-│   ├── manifest.json               # Integration metadata
-│   ├── const.py                    # Constants, defaults
-│   ├── config_flow.py              # Setup wizard (ConfigFlow)
-│   ├── sensor.py                   # Sensor entities
-│   ├── services.yaml               # Custom services definition
-│   ├── strings.json                # UI text for config flow
+panavista/
+├── custom_components/panavista/       # The integration (Python backend)
+│   ├── __init__.py                    # Integration setup, coordinator, frontend registration
+│   ├── manifest.json                  # Integration metadata (v1.0.0)
+│   ├── const.py                       # Constants, defaults
+│   ├── config_flow.py                 # Setup wizard (ConfigFlow)
+│   ├── sensor.py                      # Sensor entities
+│   ├── services.yaml                  # Custom services definition
+│   ├── strings.json                   # UI text for config flow
 │   ├── translations/
-│   │   └── en.json                 # English translations
-│   └── frontend/
-│       └── panavista-calendar-card.js  # Custom Lovelace card
-├── assets/                         # Documentation images
-├── README.md                       # User documentation
-├── LICENSE                         # MIT License
-├── hacs.json                       # HACS integration metadata
-└── CLAUDE.md                       # This file
+│   │   └── en.json                    # English translations
+│   └── frontend/                      # TypeScript/LitElement frontend
+│       ├── package.json               # Node dependencies (lit, rollup, typescript)
+│       ├── rollup.config.mjs          # Bundle config → dist/panavista-cards.js
+│       ├── tsconfig.json              # TypeScript config (ES2021, decorators)
+│       ├── dist/
+│       │   └── panavista-cards.js     # Production bundle (126KB, committed for HACS)
+│       └── src/
+│           ├── main.ts                # Entry point, registers all cards
+│           ├── types.ts               # All TypeScript interfaces
+│           ├── cards/                  # 5 Lovelace card components
+│           │   ├── panavista-grid-card.ts      # Main calendar (composes views)
+│           │   ├── panavista-clock-card.ts      # Clock display
+│           │   ├── panavista-weather-card.ts    # Weather with SVG icons
+│           │   ├── panavista-toggles-card.ts    # Calendar toggles + view switcher
+│           │   └── panavista-agenda-card.ts     # Standalone agenda list
+│           ├── components/            # View components and dialogs
+│           │   ├── view-day.ts        # Per-person column day view
+│           │   ├── view-week.ts       # 7-day grid view
+│           │   ├── view-month.ts      # Month grid view
+│           │   ├── view-agenda.ts     # Scrolling agenda list
+│           │   ├── event-create-dialog.ts  # Create/edit event dialog
+│           │   └── event-popup.ts     # Event detail popup
+│           ├── state/
+│           │   └── state-manager.ts   # Singleton state + ReactiveController
+│           ├── styles/
+│           │   ├── themes.ts          # 4 themes (light, dark, minimal, vibrant)
+│           │   └── shared.ts          # Base CSS, typography, buttons, animations
+│           └── utils/
+│               ├── date-utils.ts      # Date math, formatting, navigation
+│               ├── event-utils.ts     # Event grouping, positioning, filtering
+│               ├── ha-utils.ts        # HA service wrappers (CRUD)
+│               └── weather-icons.ts   # 15 animated SVG weather icons
+├── examples/dashboards/               # Ready-to-use dashboard YAMLs
+├── docs/plans/                        # Design docs and implementation plans
+├── README.md                          # User documentation
+├── LICENSE                            # MIT License
+├── hacs.json                          # HACS integration metadata
+└── CLAUDE.md                          # This file
 ```
 
 ## Architecture Overview
@@ -79,21 +110,36 @@ panavista-calendar/
 
 **Data Flow**: Coordinator → Sensor → Attributes → Lovelace Card
 
-#### 4. Frontend Card (`frontend/panavista-calendar-card.js`)
+#### 4. Frontend (`frontend/src/`)
 
-**Purpose**: Custom Lovelace card for calendar display
+**Purpose**: LitElement/TypeScript cards and views for the Lovelace dashboard
 
-**Current State**: Placeholder implementation (shows header, controls, calendar placeholder)
+**Architecture**: Single Rollup bundle (`dist/panavista-cards.js`, 126KB) registered via `__init__.py`
 
-**Needs Implementation**:
-- Full calendar event rendering
-- Integration with calendar entities
-- Event creation dialog
-- Drag-to-create events
-- Event editing/deletion
-- Responsive day count based on view
+**5 Lovelace Cards** (registered in `main.ts`):
+- `panavista-grid-card` - Main calendar card, composes all 4 views + dialogs
+- `panavista-clock-card` - Real-time clock with configurable size and format
+- `panavista-weather-card` - Animated SVG weather icons with condition gradients
+- `panavista-toggles-card` - Calendar visibility toggles, view switcher, "New Event" button
+- `panavista-agenda-card` - Standalone scrolling agenda list
 
-**Styling**: Uses web components with shadow DOM, inline styles for theming
+**4 View Components** (`components/`):
+- `view-day.ts` - Per-person column layout (hero view), all-day banners, now indicator
+- `view-week.ts` - 7-day grid with time gutter, overlap detection
+- `view-month.ts` - 42-cell grid, event pills, "+N more" overflow
+- `view-agenda.ts` - Grouped by date with sticky headers, relative labels
+
+**State Management** (`state/state-manager.ts`):
+- `PanaVistaStateManager` - Private singleton managing shared state (hidden calendars, current view, selected date, dialog state)
+- `PanaVistaController` - Public ReactiveController that cards use to subscribe to state changes
+- Auto-advance timer (midnight date rollover)
+- Async event CRUD (create → `calendar.create_event`, delete → `calendar.delete_event`, edit → delete + recreate)
+
+**Styling** (`styles/`):
+- `themes.ts` - 4 themes (light, dark, minimal, vibrant) as CSS custom properties
+- `shared.ts` - Base styles, typography, buttons, event chips, animations, scrollbars
+
+**Build**: `cd frontend && npm run build` (requires Node.js, only for development)
 
 ## Configuration Storage
 
@@ -160,14 +206,16 @@ Configuration is stored in Home Assistant's `.storage/core.config_entries`:
 - `sensor.py` - Add new sensor entities
 - `__init__.py` - Modify data coordinator logic
 
-#### Frontend (JavaScript) Changes
+#### Frontend (TypeScript/LitElement) Changes
 
-1. Edit `custom_components/panavista/frontend/panavista-calendar-card.js`
-2. **Clear browser cache** (Ctrl+Shift+R)
-3. **Reload dashboard** (F5)
-4. Check browser console for errors
+1. Edit source files in `custom_components/panavista/frontend/src/`
+2. Build: `cd custom_components/panavista/frontend && npm run build`
+3. **Clear browser cache** (Ctrl+Shift+R)
+4. **Reload dashboard** (F5)
+5. Check browser console for errors
 
-**No HA restart needed** for frontend changes!
+**Dev watch mode**: `npm run dev` (rebuilds on file changes, includes sourcemaps)
+**No HA restart needed** for frontend changes — just rebuild and hard-refresh.
 
 #### Translation Changes
 
@@ -295,12 +343,14 @@ class ChoresModule(PanaVistaModule):
 - **Logging** using `_LOGGER.debug/info/warning/error`
 - **Constants** in `const.py`, uppercase with type hints
 
-### JavaScript
-- **ES6+** syntax
-- **Web Components** for cards
+### TypeScript/Frontend
+- **TypeScript** with strict mode, `experimentalDecorators: true`, `useDefineForClassFields: false`
+- **LitElement** base class for all cards and components
+- **Lit decorators**: `@customElement`, `@property`, `@state`
+- **ReactiveController** for shared state (not global events)
 - **Shadow DOM** for style isolation
-- **camelCase** for variables
-- **PascalCase** for classes
+- **camelCase** for variables, **PascalCase** for classes
+- **`pv-`** prefix for internal component tag names (e.g., `pv-view-day`)
 
 ### Naming Conventions
 - **Entities**: `sensor.panavista_*`
@@ -407,31 +457,24 @@ async def test_user_step_discovers_calendars(hass):
 
 ## Roadmap
 
-### v0.1.0 - Initial Release ✅
-- [x] Basic integration structure
-- [x] Config flow with auto-discovery
-- [x] Sensor entities
-- [x] Basic frontend card
-- [x] Documentation
+### v1.0.0 - Full Calendar Rewrite ✅
+- [x] LitElement + TypeScript rewrite (single 126KB bundle)
+- [x] 5 modular cards, 4 calendar views, event CRUD
+- [x] Per-person day view, animated weather icons, 4 themes
+- [x] Cross-card state management, touch swipe navigation
 
-### v0.2.0 - Full Calendar Rendering
-- [ ] Render actual events from calendars
-- [ ] Week/day/month/agenda views
-- [ ] Event styling with calendar colors
-- [ ] Responsive day count
-
-### v0.3.0 - Event Management
-- [ ] Add event dialog (simple & advanced)
-- [ ] Edit existing events
-- [ ] Delete events
+### v1.1.0 - Polish & Enhancements (Planned)
 - [ ] Drag-to-create events
+- [ ] Multi-day event rendering improvements
+- [ ] Visual card editors for all cards
+- [ ] Accessibility (keyboard nav, ARIA)
 
-### v0.4.0 - Photo Frame Module
+### v1.2.0 - Photo Frame Module
 - [ ] Slideshow during idle
 - [ ] Google Photos integration
 - [ ] Local folder support
 
-### v0.5.0 - Chores & Tasks
+### v1.3.0 - Chores & Tasks
 - [ ] Chore tracking
 - [ ] Task lists
 - [ ] Grocy integration

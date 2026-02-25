@@ -49,7 +49,7 @@ views:
           # Main Calendar Grid
           - type: custom:panavista-grid-card
             entity: sensor.panavista_config
-            view: week
+            view: day
 
           # Upcoming Events Agenda
           - type: custom:panavista-agenda-card
