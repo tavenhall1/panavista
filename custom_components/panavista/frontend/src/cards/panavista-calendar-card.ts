@@ -10,6 +10,9 @@ import { getPanaVistaData, getPersonAvatar, getPersonName } from '../utils/ha-ut
 import { filterVisibleEvents } from '../utils/event-utils';
 import { weatherIcon } from '../utils/weather-icons';
 
+// Import card editor (visual editor instead of YAML panel)
+import './panavista-calendar-card-editor';
+
 // Import view components (triggers registration)
 import '../components/view-day';
 import '../components/view-week';
@@ -837,8 +840,8 @@ export class PanaVistaCalendarCard extends LitElement {
   // HA CARD HELPERS
   // ====================================================================
 
-  getCardSize(): number {
-    return 10;
+  static getConfigElement() {
+    return document.createElement('panavista-calendar-card-editor');
   }
 
   static getStubConfig() {
@@ -846,5 +849,9 @@ export class PanaVistaCalendarCard extends LitElement {
       entity: 'sensor.panavista_config',
       view: 'day',
     };
+  }
+
+  getCardSize(): number {
+    return 10;
   }
 }
