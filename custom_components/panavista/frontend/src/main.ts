@@ -3,6 +3,7 @@
 
 // Reusable sub-components
 import './components/color-swatch-picker';
+import './components/onboarding-wizard';
 
 import './cards/panavista-calendar-card';
 import './cards/panavista-grid-card';
