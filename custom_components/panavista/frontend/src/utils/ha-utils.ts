@@ -46,9 +46,27 @@ export function getPanaVistaData(hass: HomeAssistant, entityId = 'sensor.panavis
   if (!entity) return null;
 
   const attrs = entity.attributes as any;
+  const events = attrs.events || [];
+
+  // Diagnostic: log uid presence on first load for debugging edit/delete
+  if (events.length > 0 && !(getPanaVistaData as any)._uidLogged) {
+    (getPanaVistaData as any)._uidLogged = true;
+    const withUid = events.filter((e: any) => e.uid);
+    const withoutUid = events.filter((e: any) => !e.uid);
+    console.log(
+      `[PanaVista] Event UID check: ${withUid.length} with uid, ${withoutUid.length} without uid (total ${events.length})`,
+    );
+    if (withoutUid.length > 0) {
+      console.log('[PanaVista] Events missing uid:', withoutUid.slice(0, 3).map((e: any) => ({
+        summary: e.summary,
+        keys: Object.keys(e),
+      })));
+    }
+  }
+
   return {
     calendars: attrs.calendars || [],
-    events: attrs.events || [],
+    events,
     display: attrs.display || {
       time_format: '12h',
       weather_entity: '',
