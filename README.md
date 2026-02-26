@@ -336,7 +336,7 @@ See [CLAUDE.md](CLAUDE.md) for architecture details and development guidelines.
 
 ## 📄 License
 
-MIT License - See [LICENSE](LICENSE) for details
+MIT License - Copyright (c) 2025-2026 Stephen Hall. See [LICENSE](LICENSE) for details.
 
 ---
 
@@ -361,6 +361,6 @@ Inspired by commercial products like Skylight and Hearth, but open source, priva
 
 ---
 
-**Made with ❤️ by the Home Assistant community**
+**Made with ❤️ by Stephen Hall for the Home Assistant community**
 
 *PanaVista - Your panoramic view of family life*

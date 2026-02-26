@@ -2,6 +2,8 @@
   "name": "panavista-cards",
   "version": "1.0.0",
   "description": "PanaVista Calendar cards for Home Assistant",
+  "author": "Stephen Hall",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "scripts": {
