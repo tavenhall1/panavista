@@ -978,6 +978,7 @@ export class PanaVistaCalendarCard extends LitElement {
             .open=${true}
             .mode=${pvState.dialogOpen}
             .prefill=${pvState.createPrefill}
+            .timeFormat=${display?.time_format || '12h'}
           ></pv-event-create-dialog>
         ` : nothing}
 
