@@ -871,8 +871,8 @@ export class PanaVistaCalendarCard extends LitElement {
       }
       // Then refresh the PanaVista coordinator
       await this.hass.callService('homeassistant', 'update_entity', { entity_id: 'sensor.panavista_config' });
-    } catch (e) {
-      console.warn('[PanaVista] Manual refresh failed:', e);
+    } catch {
+      // Refresh is best-effort
     }
     // Keep spinner for at least 800ms so the animation completes
     setTimeout(() => { this._refreshing = false; }, 800);
